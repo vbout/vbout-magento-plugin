@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/******************************************************
+ * Package   : Vbout
+ * Author    : MMG
+ * Copyright : (c) 2019
+*******************************************************/
+-->
+<layout version="0.1.0">
+    <default>
+        <reference name="head">
+            <action method="addItem" ifconfig="vbout/general_settings/include_jquery">
+                <type>skin_js</type>
+                <name>js/vbout/vbout/jquery-1.12.1.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/vbout/vbout/jquery.validate.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/vbout/vbout/additional-methods.min.js</name>
+            </action>
+            <action method="addItem" ifconfig="vbout/general_settings/include_jquery">
+                <type>skin_js</type>
+                <name>js/vbout/vbout/jquery.noConflict.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/vbout/vbout/jquery.form.min.js</name>
+            </action>
+        </reference>
+        <reference name="before_body_end">
+            <block type="core/template" name="vbout_scripts" template="vbout/vbout/scripts.phtml"/>
+        </reference>
+    </default>
+</layout>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/******************************************************
+ * Package   : Vbout
+ * Author    : MMG
+ * Copyright : (c) 2019
+*******************************************************/
+-->
+<widgets>
+    <vbout_form type="vbout/form" translate="name description" module="vbout">
+        <name>Vbout Form</name>
+        <description></description>
+        <parameters>
+            <form_id translate="label">
+                <visible>1</visible>
+                <required>0</required>
+                <label>Select Form</label>
+                <type>select</type>
+                <source_model>vbout/system_config_source_forms</source_model>
+            </form_id>
+            <template translate="label">
+                <label>Template</label>
+                <visible>1</visible>
+                <required>1</required>
+                <type>select</type>
+                <value>vbout/vbout/form/default.phtml</value>
+                <values>
+                    <default translate="label">
+                        <value>vbout/vbout/form/default.phtml</value>
+                        <label>Form Default</label>
+                    </default>
+                </values>
+            </template>
+        </parameters>
+    </vbout_form>
+</widgets>

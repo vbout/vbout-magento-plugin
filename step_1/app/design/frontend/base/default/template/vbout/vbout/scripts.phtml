@@ -1,0 +1,23 @@
+<?php
+//
+//$storeId = Mage::app()->getStore()->getStoreId();
+//$helper = Mage::helper('vbout');
+//$code = html_entity_decode($helper->getTrackingSettings('code', $storeId));
+//if ($helper->getTrackingSettings('activated', $storeId) && $code) {
+//    if (Mage::app()->getFrontController()->getAction()->getFullActionName() == 'checkout_onepage_success') {
+//        $orderId = Mage::getSingleton('checkout/type_onepage')->getCheckout()->getLastOrderId();
+//        $order = Mage::getModel('sales/order')->load($orderId);
+//        $goalValueString = '_vbset.push([\'_ecommerce\', \'enabled\']);
+//   _vbset.push([\'_type\', \'custom\']);
+//   _vbset.push([\'_amount\', \'{DYNAMIC_AMOUNT_GOES_HERE}\']);
+//   (function() {';
+//        $goalValueString = str_replace('{DYNAMIC_AMOUNT_GOES_HERE}', $order->getGrandTotal(), $goalValueString);
+//        $code = str_replace('(function() {', $goalValueString, $code);
+//    }
+//    $finalCode = str_replace('<script type="text/javascript">', '', $code);
+//    $finalCode = str_replace('</script>', '', $finalCode);
+//    $finalCode = str_replace('&lt;script type=&quot;text/javascript&quot;&gt;', '', $finalCode);
+//    $finalCode = str_replace('&lt;/script&gt;', '', $finalCode);
+//    echo '<script type="text/javascript">' . $finalCode . '</script>';
+//}
+?>

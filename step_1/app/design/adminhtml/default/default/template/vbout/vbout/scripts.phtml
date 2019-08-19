@@ -1,0 +1,31 @@
+<script type="text/javascript">
+    //<![CDATA[
+    if ($('vbout_tracking_settings_domain') != undefined) {
+        document.observe('dom:loaded', function () {
+            getTrackerCode();
+        });
+
+        $('vbout_tracking_settings_domain').observe('change', function (event) {
+            getTrackerCode();
+        });
+
+        function getTrackerCode() {
+            var domainId = $('vbout_tracking_settings_domain').value;
+            new Ajax.Request('<?php echo Mage::getUrl('vbout/adminhtml_index/getTrackerCode', array('_secure' => true)); ?>', {
+                method: 'post',
+                parameters: {domain_id: domainId},
+                onSuccess: function (transport) {
+                    var response = transport.responseText.evalJSON();
+                    $('vbout_tracking_settings_code').value = scriptDecode(response.trackercode);
+                }
+            });
+        }
+
+        function scriptDecode(input) {
+            var e = document.createElement('div');
+            e.innerHTML = input;
+            return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+        }
+    }
+    //]]>
+</script>
