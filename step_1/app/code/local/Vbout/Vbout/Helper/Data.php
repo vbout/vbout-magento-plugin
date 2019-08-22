@@ -141,4 +141,11 @@ class Vbout_Vbout_Helper_Data extends Mage_Core_Helper_Abstract {
         }
         return $sync_current_products;
     }
+
+    public function userSessionId()
+    {
+        $sessionId = $cookieValue = Mage::getModel('core/cookie')->get('vbtEcommerceUniqueId');
+        return $sessionId;
+    }
+
     }

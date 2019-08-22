@@ -30,7 +30,8 @@ class Vbout_Vbout_Model_Observer {
                             "lastname"  => $customer->getLastname(),
                             "email"     => $customer->getEmail(),
                             'domain'    => $helper->getDomain(),
-                            'ipaddress' => $_SERVER['REMOTE_ADDR']
+                            'ipaddress' => $_SERVER['REMOTE_ADDR'],
+                            "uniqueid"  => $helper->userSessionId(),
 
                         );
                         $vboutApp = new EcommerceWS($authTokens);
@@ -72,11 +73,13 @@ class Vbout_Vbout_Model_Observer {
 
                             $store = array(
                                 "domain" => $helper->getDomain(),
-                                "cartcurrency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                "cartid" => $cart->getId(),
-                                'ipaddress' => $_SERVER['REMOTE_ADDR'],
-                                "customer" => $email,
+                                "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                "cartid"        => $cart->getId(),
+                                'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                                "customer"      => $email,
                                 "storename"     => Mage::app()->getStore()->getFrontendName(),
+                                "uniqueid"      => $helper->userSessionId(),
+
 //                            "abandonurl"    => "https://johnny.gloclick.com/cart/"
                             );
                             $result = $vboutApp->Cart($store, $action);
@@ -131,21 +134,23 @@ class Vbout_Vbout_Model_Observer {
                                 $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $productImage->getImage();
 
                                 $productData = array(
-                                    "productid" => $product->getId(),
-                                    "cartid" => $cart->getId(),
-                                    "name" => $product->getName(),
-                                    "price" => (float)$product->getFinalPrice(),
-                                    "description" => $product->getDescription(),
+                                    "productid"     => $product->getId(),
+                                    "cartid"        => $cart->getId(),
+                                    "name"          => $product->getName(),
+                                    "price"         => (float)$product->getFinalPrice(),
+                                    "description"   => $product->getDescription(),
                                     "discountprice" => $discountPrice,
-                                    "currency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                    "sku" => $product->getSku(),
-                                    "quantity" => $productQ->getQty(),
-                                    "categoryid" => $categoryId,
-                                    "category" => $categoryName,
-                                    "link" => $product->getProductUrl(),
-                                    "variation" => $variations,
-                                    "image" => $productImage,
-                                    'domain' => $helper->getDomain(),
+                                    "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                    "sku"           => $product->getSku(),
+                                    "quantity"      => $productQ->getQty(),
+                                    "categoryid"    => $categoryId,
+                                    "category"      => $categoryName,
+                                    "link"          => $product->getProductUrl(),
+                                    "variation"     => $variations,
+                                    "image"         => $productImage,
+                                    'domain'        => $helper->getDomain(),
+                                    "uniqueid"      => $helper->userSessionId(),
+
                                 );
 //                              $result1 = $vboutApp->CartItem($productData,3);
                                 $result = $vboutApp->CartItem($productData, 1);
@@ -184,12 +189,12 @@ class Vbout_Vbout_Model_Observer {
                     $cart = Mage::getModel('checkout/session')->getQuote();
 
                     $customerData = array(
-                        "firstname" => $customer->getFirstname(),
-                        "lastname" => $customer->getLastname(),
-                        "email" => $customer->getEmail(),
-                        'domain' => $helper->getDomain(),
-                        'ipaddress' => $_SERVER['REMOTE_ADDR']
-
+                        "firstname"     => $customer->getFirstname(),
+                        "lastname"      => $customer->getLastname(),
+                        "email"         => $customer->getEmail(),
+                        'domain'        => $helper->getDomain(),
+                        'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                        "uniqueid"      => $helper->userSessionId(),
                     );
                     $result = $vboutApp->Customer($customerData, 1);
                     $cartD = Mage::getSingleton('checkout/cart')->getQuote();
@@ -197,11 +202,12 @@ class Vbout_Vbout_Model_Observer {
                     if ($cartD->getItemsQty() > 0) {
                         $store = array(
                             "domain" => $helper->getDomain(),
-                            "cartcurrency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                            "cartid" => $cart->getId(),
-                            'ipaddress' => $_SERVER['REMOTE_ADDR'],
-                            "customer" => $email,
-                            "storename" => Mage::app()->getStore()->getFrontendName(),
+                            "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                            "cartid"        => $cart->getId(),
+                            'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                            "customer"      => $email,
+                            "uniqueid"      => $helper->userSessionId(),
+                            "storename"     => Mage::app()->getStore()->getFrontendName(),
 //                            "abandonurl" => "https://johnny.gloclick.com/cart/"
                         );
                         $result = $vboutApp->Cart($store, $action);
@@ -257,22 +263,22 @@ class Vbout_Vbout_Model_Observer {
                             $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $productImage->getImage();
 
                             $productData = array(
-                                "productid" => $product->getId(),
-                                "cartid" => $cart->getId(),
-                                "name" => $product->getName(),
-                                "price" => (float)$product->getFinalPrice(),
-                                "description" => $product->getDescription(),
+                                "productid"     => $product->getId(),
+                                "cartid"        => $cart->getId(),
+                                "name"          => $product->getName(),
+                                "price"         => (float)$product->getFinalPrice(),
+                                "description"   => $product->getDescription(),
                                 "discountprice" => $discountPrice,
-                                "currency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                "sku" => $product->getSku(),
-                                "quantity" => $productQ->getQty(),
-                                "categoryid" => $categoryId,
-                                "category" => $categoryName,
-                                "link" => $product->getProductUrl(),
-                                "variation" => $variations,
-
-                                "image" => $productImage,
-                                'domain' => $helper->getDomain(),
+                                "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                "sku"           => $product->getSku(),
+                                "quantity"      => $productQ->getQty(),
+                                "categoryid"    => $categoryId,
+                                "category"      => $categoryName,
+                                "link"          => $product->getProductUrl(),
+                                "variation"     => $variations,
+                                "uniqueid"      => $helper->userSessionId(),
+                                "image"         => $productImage,
+                                'domain'        => $helper->getDomain(),
                             );
                             $result = $vboutApp->CartItem($productData, 1);
                         }
@@ -326,6 +332,8 @@ class Vbout_Vbout_Model_Observer {
                         'ipaddress'     => $_SERVER['REMOTE_ADDR'],
                         "customer"      => $email,
                         "storename"     => Mage::app()->getStore()->getFrontendName(),
+                        "uniqueid"      => $helper->userSessionId(),
+
 //                        "abandonurl"    => "https://johnny.gloclick.com/cart/"
                     );
                     $result = $vboutApp->Cart($store, $action);
@@ -400,7 +408,7 @@ class Vbout_Vbout_Model_Observer {
                             "category"      => $categoryName,
                             "link"          => $product->getProductUrl(),
                             "variation"     => $variations,
-
+                            "uniqueid"      => $helper->userSessionId(),
                             "image"         => $productImage,
                             'domain'        => $helper->getDomain(),
                         );
@@ -453,12 +461,14 @@ class Vbout_Vbout_Model_Observer {
                     $cart = Mage::getModel('checkout/session')->getQuote();
                     if ($cart->getItemsQty() > 0) {
                         $store = array(
-                            "domain" => $helper->getDomain(),
-                            "cartcurrency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                            "cartid" => $cart->getId(),
-                            'ipaddress' => $_SERVER['REMOTE_ADDR'],
-                            "customer" => $email,
-                            "storename" => Mage::app()->getStore()->getFrontendName(),
+                            "domain"        => $helper->getDomain(),
+                            "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                            "cartid"        => $cart->getId(),
+                            'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                            "customer"      => $email,
+                            "storename"     => Mage::app()->getStore()->getFrontendName(),
+                            "uniqueid"      => $helper->userSessionId(),
+
 //                            "abandonurl" => "https://johnny.gloclick.com/cart/"
                         );
                         $result = $vboutApp->Cart($store, $action);
@@ -513,21 +523,22 @@ class Vbout_Vbout_Model_Observer {
                             $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $productImage->getImage();
 
                             $productData = array(
-                                "productid" => $product->getId(),
-                                "cartid" => $cart->getId(),
-                                "name" => $product->getName(),
-                                "price" => (float)$product->getFinalPrice(),
-                                "description" => $product->getDescription(),
+                                "productid"     => $product->getId(),
+                                "cartid"        => $cart->getId(),
+                                "name"          => $product->getName(),
+                                "price"         => (float)$product->getFinalPrice(),
+                                "description"   => $product->getDescription(),
                                 "discountprice" => $discountPrice,
-                                "currency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                "sku" => $product->getSku(),
-                                "quantity" => $productQ->getQty(),
-                                "categoryid" => $categoryId,
-                                "category" => $categoryName,
-                                "link" => $product->getProductUrl(),
-                                "variation" => $variations,
-                                "image" => $productImage,
-                                'domain' => $helper->getDomain(),
+                                "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                "sku"           => $product->getSku(),
+                                "quantity"      => $productQ->getQty(),
+                                "categoryid"    => $categoryId,
+                                "category"      => $categoryName,
+                                "link"          => $product->getProductUrl(),
+                                "variation"     => $variations,
+                                "image"         => $productImage,
+                                'domain'        => $helper->getDomain(),
+                                "uniqueid"      => $helper->userSessionId(),
                             );
                             $result1 = $vboutApp->CartItem($productData, 3);
                             $result = $vboutApp->CartItem($productData, 1);
@@ -561,6 +572,7 @@ class Vbout_Vbout_Model_Observer {
                         'domain'    => $helper->getDomain(),
                         'customer'  => $email,
                         'query'     => $query,
+                        "uniqueid"  => $helper->userSessionId(),
                         'ipaddress' => $_SERVER['REMOTE_ADDR'],
                         );
                     $result = $vboutApp->sendProductSearch($searchPayload);
@@ -641,6 +653,8 @@ class Vbout_Vbout_Model_Observer {
                 "link"              => $product->getProductUrl(),
                 "image"             => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage(),
                 'domain'            => $helper->getDomain(),
+                "uniqueid"          => $helper->userSessionId(),
+
             );
             $result = $vboutApp->Product($productData, 1);
         }
@@ -657,7 +671,9 @@ class Vbout_Vbout_Model_Observer {
                         "categoryid"    => $category_id,
                         "name"          => $category->getName(),
                         "link"          => $category->getUrl(),
-                        'ipaddress'     =>$_SERVER['REMOTE_ADDR']
+                        'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                        "uniqueid"      => $helper->userSessionId(),
+
                     );
                     $result = $vboutApp->Category($category, 1);
                 }
@@ -685,6 +701,7 @@ class Vbout_Vbout_Model_Observer {
 
                 $orderData = array(
                     "cartid" => $order['quote_id'],
+                    "uniqueid"      => $helper->userSessionId(),
                     "domain" => $helper->getDomain(),
                     'ipaddress'     =>$_SERVER['REMOTE_ADDR'],
                     "orderid" => $order['increment_id'],
