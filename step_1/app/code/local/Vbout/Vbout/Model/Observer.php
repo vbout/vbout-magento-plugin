@@ -152,7 +152,6 @@ class Vbout_Vbout_Model_Observer {
                                     "uniqueid"      => $helper->userSessionId(),
 
                                 );
-//                              $result1 = $vboutApp->CartItem($productData,3);
                                 $result = $vboutApp->CartItem($productData, 1);
                             }
                         }
@@ -319,7 +318,7 @@ class Vbout_Vbout_Model_Observer {
                         "domain"        => $helper->getDomain(),
                         "cartid"        => $cart->getId(),
                     );
-                    $result = $vboutApp->Cart($clearCartData, 3);
+                    $result = $vboutApp->Cart($clearCartData, 4);
 
                     $cartD = Mage::getSingleton('checkout/cart')->getQuote();
                     $products = $cartD->getAllItems();
@@ -421,11 +420,6 @@ class Vbout_Vbout_Model_Observer {
                             "cartid"        => $cart->getId(),
                         );
                         $result = $vboutApp->Cart($clearCartData, 3);
-                        $clearCartData = array(
-                            "domain"        => $helper->getDomain(),
-                            "cartid"        => $cart->getId(),
-                        );
-                        $result = $vboutApp->Cart($clearCartData, 3);
 
                     }
 
@@ -471,7 +465,7 @@ class Vbout_Vbout_Model_Observer {
 
 //                            "abandonurl" => "https://johnny.gloclick.com/cart/"
                         );
-                        $result = $vboutApp->Cart($store, $action);
+                        $result = $vboutApp->Cart($store, 2 );
                         $cartD = Mage::getSingleton('checkout/session')->getQuote();
                         $products = $cartD->getAllVisibleItems();
                         foreach ($products as $productQ) {

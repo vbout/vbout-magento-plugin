@@ -19,7 +19,7 @@ class EcommerceWS extends Vbout
         try {
             $this->set_method('POST');
             if ($action == 1 )
-                $insertRecord = $this->addCustomer($data);
+                $insertRecord = $this->UpsertCustomer($data);
             else if($action == 2)
                 $insertRecord = $this->editCustomer($data);
             else if ($action ==3)
@@ -41,7 +41,11 @@ class EcommerceWS extends Vbout
             $this->set_method('POST');
             if ($action == 1 )
                 $insertRecord = $this->CreateCart($data);
+            if ($action == 2 )
+                $insertRecord = $this->UpdateCart($data);
            elseif ($action == 3 )
+                $insertRecord = $this->RemoveCart($data);
+            elseif ($action == 4 )
                 $insertRecord = $this->EmptyCart($data);
             if ($insertRecord != null && isset($insertRecord['data'])) {
                 $result = $insertRecord['data'];
