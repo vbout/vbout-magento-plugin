@@ -60,102 +60,102 @@ class Vbout_Vbout_Model_Observer {
             else
                 $email = Mage::getSingleton('customer/session')->getCustomer()->getEmail();
 
-                $storeId = Mage::app()->getStore()->getId();
-                $helper = Mage::helper('vbout');
-                $authTokens = $helper->getAuthTokens();
-                if (is_array($authTokens)) {
-                    if ($helper->getAbandonedCart() == 1) {
-                        $vboutApp = new EcommerceWS($authTokens);
-                        $cart = Mage::getModel('checkout/session')->getQuote();
-                        $cartD = Mage::getSingleton('checkout/cart')->getQuote();
+            $storeId = Mage::app()->getStore()->getId();
+            $helper = Mage::helper('vbout');
+            $authTokens = $helper->getAuthTokens();
+            if (is_array($authTokens)) {
+                if ($helper->getAbandonedCart() == 1) {
+                    $vboutApp = new EcommerceWS($authTokens);
+                    $cart = Mage::getModel('checkout/session')->getQuote();
+                    $cartD = Mage::getSingleton('checkout/cart')->getQuote();
 
-                        if ($cartD->getItemsQty() > 0) {
+                    if ($cartD->getItemsQty() > 0) {
 
-                            $store = array(
-                                "domain" => $helper->getDomain(),
-                                "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                "cartid"        => $cart->getId(),
-                                'ipaddress'     => $_SERVER['REMOTE_ADDR'],
-                                "customer"      => $email,
-                                "storename"     => Mage::app()->getStore()->getFrontendName(),
-                                "uniqueid"      => $helper->userSessionId(),
+                        $store = array(
+                            "domain" => $helper->getDomain(),
+                            "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                            "cartid"        => $cart->getId(),
+                            'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                            "customer"      => $email,
+                            "storename"     => Mage::app()->getStore()->getFrontendName(),
+                            "uniqueid"      => $helper->userSessionId(),
 
 //                            "abandonurl"    => "https://johnny.gloclick.com/cart/"
-                            );
-                            $result = $vboutApp->Cart($store, $action);
-                            $products = $cartD->getAllItems();
-                            foreach ($products as $productQ) {
-                                $product = $productQ->getProduct();
+                        );
+                        $result = $vboutApp->Cart($store, $action);
+                        $products = $cartD->getAllItems();
+                        foreach ($products as $productQ) {
+                            $product = $productQ->getProduct();
 
-                                $options = $product->getTypeInstance(true)->getOrderOptions($product);
-                                $priceVariations = 0;
+                            $options = $product->getTypeInstance(true)->getOrderOptions($product);
+                            $priceVariations = 0;
 
-                                //selected variations
-                                $variations = array();
-                                if (!empty($options)) {
-                                    $options = $options['options'];
-                                    foreach ($options as $option) {
-                                        $optionTitle = $option['label'];
-                                        $optionId = $option['option_id'];
-                                        $optionType = $option['option_type'];
-                                        $optionValue = $option['value'];
-                                        if ($optionType === 'drop_down') {
-                                            $variations[$option['label']] = $optionValue;
-                                        }
+                            //selected variations
+                            $variations = array();
+                            if (!empty($options)) {
+                                $options = $options['options'];
+                                foreach ($options as $option) {
+                                    $optionTitle = $option['label'];
+                                    $optionId = $option['option_id'];
+                                    $optionType = $option['option_type'];
+                                    $optionValue = $option['value'];
+                                    if ($optionType === 'drop_down') {
+                                        $variations[$option['label']] = $optionValue;
                                     }
-                                    $options = Mage::getModel('catalog/product_option')->getProductOptionCollection($product);
-                                    foreach ($options as $option) {
-                                        if ($option->getType() === 'drop_down') {
-                                            $values = Mage::getSingleton('catalog/product_option_value')->getValuesCollection($option);
-                                            foreach ($values as $value) {
-                                                if (isset($variations[$option->getDefaultTitle()])) {
-                                                    if ($variations[$option->getDefaultTitle()] == $value->getTitle()) {
-                                                        $priceVariations = $priceVariations + (double)$value->getPrice();
-                                                    }
+                                }
+                                $options = Mage::getModel('catalog/product_option')->getProductOptionCollection($product);
+                                foreach ($options as $option) {
+                                    if ($option->getType() === 'drop_down') {
+                                        $values = Mage::getSingleton('catalog/product_option_value')->getValuesCollection($option);
+                                        foreach ($values as $value) {
+                                            if (isset($variations[$option->getDefaultTitle()])) {
+                                                if ($variations[$option->getDefaultTitle()] == $value->getTitle()) {
+                                                    $priceVariations = $priceVariations + (double)$value->getPrice();
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                if ($product->getPrice() != $product->getFinalPrice()) {
-//                                $discountPrice = $product->getPrice() - ($product->getFinalPrice() - $priceVariations);
-                                    $discountPrice = ($product->getFinalPrice() - $priceVariations);
-
-                                } else $discountPrice = '0.0';
-                                if ($product->getCategoryIds()[0] != '') {
-                                    $categoryId = $product->getCategoryIds()[0];
-                                    $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
-                                } else {
-                                    $categoryName = 'N/A';
-                                    $categoryId = 'N/A';
-                                }
-                                //Image
-                                $productImage = Mage::getModel('catalog/product')->load($product->getId());
-                                $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $productImage->getImage();
-
-                                $productData = array(
-                                    "productid"     => $product->getId(),
-                                    "cartid"        => $cart->getId(),
-                                    "name"          => $product->getName(),
-                                    "price"         => (float)$product->getFinalPrice(),
-                                    "description"   => $product->getDescription(),
-                                    "discountprice" => $discountPrice,
-                                    "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                                    "sku"           => $product->getSku(),
-                                    "quantity"      => $productQ->getQty(),
-                                    "categoryid"    => $categoryId,
-                                    "category"      => $categoryName,
-                                    "link"          => $product->getProductUrl(),
-                                    "variation"     => $variations,
-                                    "image"         => $productImage,
-                                    'domain'        => $helper->getDomain(),
-                                    "uniqueid"      => $helper->userSessionId(),
-
-                                );
-                                $result = $vboutApp->CartItem($productData, 1);
                             }
+                            if ($product->getPrice() != $product->getFinalPrice()) {
+//                                $discountPrice = $product->getPrice() - ($product->getFinalPrice() - $priceVariations);
+                                $discountPrice = ($product->getFinalPrice() - $priceVariations);
+
+                            } else $discountPrice = '0.0';
+                            if ($product->getCategoryIds()[0] != '') {
+                                $categoryId = $product->getCategoryIds()[0];
+                                $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
+                            } else {
+                                $categoryName = 'N/A';
+                                $categoryId = 'N/A';
+                            }
+                            //Image
+                            $productImage = Mage::getModel('catalog/product')->load($product->getId());
+                            $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $productImage->getImage();
+
+                            $productData = array(
+                                "productid"     => $product->getId(),
+                                "cartid"        => $cart->getId(),
+                                "name"          => $product->getName(),
+                                "price"         => (float)$product->getFinalPrice(),
+                                "description"   => $product->getDescription(),
+                                "discountprice" => $discountPrice,
+                                "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                "sku"           => $product->getSku(),
+                                "quantity"      => $productQ->getQty(),
+                                "categoryid"    => $categoryId,
+                                "category"      => $categoryName,
+                                "link"          => $product->getProductUrl(),
+                                "variation"     => $variations,
+                                "image"         => $productImage,
+                                'domain'        => $helper->getDomain(),
+                                "uniqueid"      => $helper->userSessionId(),
+
+                            );
+                            $result = $vboutApp->CartItem($productData, 1);
                         }
                     }
+                }
             }
         } catch (Exception $e) {
             Mage::log($e->getMessage(), null, 'vbout-ecommerce-marketing.log');
@@ -325,95 +325,95 @@ class Vbout_Vbout_Model_Observer {
                     if( $cartD->getItemsQty() > 0 )
                     {
                         $store = array(
-                        "domain"        => $helper->getDomain(),
-                        "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                        "cartid"        => $cart->getId(),
-                        'ipaddress'     => $_SERVER['REMOTE_ADDR'],
-                        "customer"      => $email,
-                        "storename"     => Mage::app()->getStore()->getFrontendName(),
-                        "uniqueid"      => $helper->userSessionId(),
+                            "domain"        => $helper->getDomain(),
+                            "cartcurrency"  => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                            "cartid"        => $cart->getId(),
+                            'ipaddress'     => $_SERVER['REMOTE_ADDR'],
+                            "customer"      => $email,
+                            "storename"     => Mage::app()->getStore()->getFrontendName(),
+                            "uniqueid"      => $helper->userSessionId(),
 
 //                        "abandonurl"    => "https://johnny.gloclick.com/cart/"
-                    );
-                    $result = $vboutApp->Cart($store, $action);
-                    
-                    foreach ($products as $productQ)
-                    {
-                        $product = $productQ->getProduct();
+                        );
+                        $result = $vboutApp->Cart($store, $action);
 
-                        $options = $product->getTypeInstance(true)->getOrderOptions($product);
-                        $priceVariations = 0;
+                        foreach ($products as $productQ)
+                        {
+                            $product = $productQ->getProduct();
 
-                        //selected variations
-                        $variations = array();
-                        if (!empty($options)) {
-                            $options = $options['options'];
-                            foreach ($options as $option) {
-                                $optionTitle = $option['label'];
-                                $optionId = $option['option_id'];
-                                $optionType = $option['option_type'];
-                                $optionValue = $option['value'];
-                                if ($optionType === 'drop_down') {
-                                    $variations[$option['label']] = $optionValue;
+                            $options = $product->getTypeInstance(true)->getOrderOptions($product);
+                            $priceVariations = 0;
+
+                            //selected variations
+                            $variations = array();
+                            if (!empty($options)) {
+                                $options = $options['options'];
+                                foreach ($options as $option) {
+                                    $optionTitle = $option['label'];
+                                    $optionId = $option['option_id'];
+                                    $optionType = $option['option_type'];
+                                    $optionValue = $option['value'];
+                                    if ($optionType === 'drop_down') {
+                                        $variations[$option['label']] = $optionValue;
+                                    }
                                 }
-                            }
-                            $options = Mage::getModel('catalog/product_option')->getProductOptionCollection($product);
-                            foreach ($options as $option) {
-                                if ($option->getType() === 'drop_down') {
-                                    $values = Mage::getSingleton('catalog/product_option_value')->getValuesCollection($option);
-                                    foreach ($values as $value) {
-                                        if (isset($variations[$option->getDefaultTitle()])) {
-                                            if ($variations[$option->getDefaultTitle()] == $value->getTitle())
-                                            {
-                                                $priceVariations = $priceVariations + (double)$value->getPrice();
+                                $options = Mage::getModel('catalog/product_option')->getProductOptionCollection($product);
+                                foreach ($options as $option) {
+                                    if ($option->getType() === 'drop_down') {
+                                        $values = Mage::getSingleton('catalog/product_option_value')->getValuesCollection($option);
+                                        foreach ($values as $value) {
+                                            if (isset($variations[$option->getDefaultTitle()])) {
+                                                if ($variations[$option->getDefaultTitle()] == $value->getTitle())
+                                                {
+                                                    $priceVariations = $priceVariations + (double)$value->getPrice();
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        if ($product->getPrice() != $product->getFinalPrice())
-                        {
+                            if ($product->getPrice() != $product->getFinalPrice())
+                            {
 //                                $discountPrice = $product->getPrice() - ($product->getFinalPrice() - $priceVariations);
-                            $discountPrice =($product->getFinalPrice() - $priceVariations);
+                                $discountPrice =($product->getFinalPrice() - $priceVariations);
 
+                            }
+                            else $discountPrice = '0.0';
+                            if ($product->getCategoryIds()[0] != '')
+                            {
+                                $categoryId = $product->getCategoryIds()[0];
+                                $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
+                            }
+                            else
+                            {
+                                $categoryName = 'N/A';
+                                $categoryId = 'N/A';
+                            }
+                            //Image
+                            $productImage = Mage::getModel('catalog/product')->load($product->getId());
+                            $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$productImage->getImage();
+
+                            $productData = array(
+                                "productid"     => $product->getId(),
+                                "cartid"        => $cart->getId(),
+                                "name"          => $product->getName(),
+                                "price"         => (float)$product->getFinalPrice(),
+                                "description"   => $product->getDescription(),
+                                "discountprice" =>  $discountPrice,
+                                "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                                "sku"           => $product->getSku(),
+                                "quantity"      => $productQ->getQty(),
+                                "categoryid"    => $categoryId,
+                                "category"      => $categoryName,
+                                "link"          => $product->getProductUrl(),
+                                "variation"     => $variations,
+                                "uniqueid"      => $helper->userSessionId(),
+                                "image"         => $productImage,
+                                'domain'        => $helper->getDomain(),
+                            );
+                            $result  = $vboutApp->CartItem($productData,1);
                         }
-                        else $discountPrice = '0.0';
-                        if ($product->getCategoryIds()[0] != '')
-                        {
-                            $categoryId = $product->getCategoryIds()[0];
-                            $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
-                        }
-                        else
-                        {
-                            $categoryName = 'N/A';
-                            $categoryId = 'N/A';
-                        }
-                        //Image
-                        $productImage = Mage::getModel('catalog/product')->load($product->getId());
-                        $productImage = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$productImage->getImage();
-                        
-                        $productData = array(
-                            "productid"     => $product->getId(),
-                            "cartid"        => $cart->getId(),
-                            "name"          => $product->getName(),
-                            "price"         => (float)$product->getFinalPrice(),
-                            "description"   => $product->getDescription(),
-                            "discountprice" =>  $discountPrice,
-                            "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                            "sku"           => $product->getSku(),
-                            "quantity"      => $productQ->getQty(),
-                            "categoryid"    => $categoryId,
-                            "category"      => $categoryName,
-                            "link"          => $product->getProductUrl(),
-                            "variation"     => $variations,
-                            "uniqueid"      => $helper->userSessionId(),
-                            "image"         => $productImage,
-                            'domain'        => $helper->getDomain(),
-                        );
-                        $result  = $vboutApp->CartItem($productData,1);
                     }
-                }
                     else{
                         $clearCartData = array(
                             "domain"        => $helper->getDomain(),
@@ -568,7 +568,7 @@ class Vbout_Vbout_Model_Observer {
                         'query'     => $query,
                         "uniqueid"  => $helper->userSessionId(),
                         'ipaddress' => $_SERVER['REMOTE_ADDR'],
-                        );
+                    );
                     $result = $vboutApp->sendProductSearch($searchPayload);
                 } catch (Exception $e) {
                     Mage::log($e->getMessage(), null, 'vbout-ecommerce-marketing.log');
@@ -579,21 +579,21 @@ class Vbout_Vbout_Model_Observer {
 
     //Product View
     public function productView(Varien_Event_Observer $observer)
+    {
+        $event = $observer->getEvent();
+        $helper = Mage::helper('vbout');
+        $authTokens = $helper->getAuthTokens();
+        $vboutApp = new EcommerceWS($authTokens);
+        //User Email if logged in
+        if( ! Mage::getSingleton('customer/session')->isLoggedIn())
+            $email = '';
+        else
         {
-            $event = $observer->getEvent();
-            $helper = Mage::helper('vbout');
-            $authTokens = $helper->getAuthTokens();
-            $vboutApp = new EcommerceWS($authTokens);
-            //User Email if logged in
-            if( ! Mage::getSingleton('customer/session')->isLoggedIn())
-                $email = '';
-            else
-            {
-                $customer = Mage::getSingleton('customer/session')->getCustomer();
-                $email= $customer->getEmail();
-            }
-            $product_id = $observer->getEvent()->getProduct()->getId();
-            $product = Mage::getModel('catalog/product')->load($product_id);
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            $email= $customer->getEmail();
+        }
+        $product_id = $observer->getEvent()->getProduct()->getId();
+        $product = Mage::getModel('catalog/product')->load($product_id);
         if ($helper->getProductVisits() == 1) {
             //Get variations
 //            $variation = array();
@@ -690,7 +690,7 @@ class Vbout_Vbout_Model_Observer {
                 $orderId = Mage::getSingleton('checkout/session')->getLastOrderId();
 
                 $order = Mage::getModel('sales/order')->load($orderId);
-                 if ($order['discount_amount'] != 0 )
+                if ($order['discount_amount'] != 0 )
                     $discountTotal = $order['discount_amount'];
 
                 $orderData = array(
@@ -718,7 +718,7 @@ class Vbout_Vbout_Model_Observer {
                         "lastname" => $order['customer_lastname'],
                         "email" => $order['customer_email'],
                         "phone" => $order->getShippingAddress()->getTelephone(),
-                     ),
+                    ),
                     "billinginfo" => array(
                         "firstname" => $order->getBillingAddress()->getFirstname(),
                         "lastname" =>  $order->getBillingAddress()->getLastname(),
@@ -746,7 +746,7 @@ class Vbout_Vbout_Model_Observer {
                         "zipcode" => $order->getShippingAddress()->getPostcode(),
                     )
                 );
-                 $result = $vboutApp->Order($orderData, 1);
+                $result = $vboutApp->Order($orderData, 1);
             }
         } catch (Exception $e) {
             Mage::log($e->getMessage(), null, 'vbout-ecommerce-marketing.log');
@@ -784,10 +784,10 @@ class Vbout_Vbout_Model_Observer {
                 $discountPrice = $product->getFinalPrice();
             else $discountPrice = '0.0';
             if ($product->getCategoryIds()[0] != '')
-                {
+            {
                 $categoryId = $product->getCategoryIds()[0];
                 $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
-                }
+            }
             else
             {
                 $categoryName = 'N/A';

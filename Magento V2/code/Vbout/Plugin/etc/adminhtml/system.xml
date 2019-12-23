@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="Vbout" translate="label" sortOrder="10">
+            <label>Vbout</label>
+        </tab>
+            <section id="vbout" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Vbout</label>
+            <tab>Vbout</tab>
+            <resource>Mageplaza_HelloWorld::helloworld_config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>API Configuration</label>
+                <field id="api_key" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>API Key</label>
+<!--                    <backend_model>Vbout\Plugin\Model\Config\Backend\Custom</backend_model>-->
+                    <comment><![CDATA[Your Vbout account User Key. Click <a href="https://app.vbout.com/Settings" target="_blank">here</a> to obtain your api key.]]></comment>
+                </field>
+            </group>
+
+            <group id="api_settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Integration Settings</label>
+
+                <field id="abandoned_carts" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Abandoned carts</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When a checkout/order is created or updated on Magento.</comment>
+                </field>
+
+                <field id="search" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When customers search for a specific product on Magento.</comment>
+                </field>
+
+                <field id="product_visits" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Product Visits</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When customers visit a product on Magento.</comment>
+                </field>
+
+                <field id="category_visits" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Category Visits</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When customers' visit a specific category on Magento</comment>
+                </field>
+
+                <field id="customers" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Customer data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When customers' profiles are added or updated on Magento.</comment>
+                </field>
+
+                <field id="current_customers" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Exsisting Customers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Syncs customers' data before installing the plugin on Magento.</comment>
+                </field>
+
+                <field id="product_feed" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Product data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When products are added or updated on Magento.</comment>
+                </field>
+
+                <field id="sync_current_products" translate="select" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Existing products</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Syncs products data before installing the plugin on Magento.</comment>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>
