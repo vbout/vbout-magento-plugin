@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--
+/******************************************************
+ * Package   : Vbout
+ * Author    : MMG
+ * Copyright : (c) 2019
+*******************************************************/
+-->
+<config>
+    <tabs>
+        <vbout translate="label" module="vbout">
+            <label>Vbout</label>
+            <sort_order>200</sort_order>
+        </vbout>
+    </tabs>
+    <sections>
+        <vbout translate="label" module="vbout">
+            <label>Vbout</label>
+            <tab>vbout</tab>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <vbout_info translate="label" module="vbout">
+                    <frontend_model>vbout/adminhtml_system_config_fieldset_info</frontend_model>
+                    <info_link>https://www.vbout.com/?ref=VB-4378262451</info_link>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                </vbout_info>
+                <api_settings translate="label" module="vbout">
+                    <label>API Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <expanded>1</expanded>
+                    <fields>
+                        <user_key translate="label">
+                            <label>API Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Your Vbout account User Key. Click <a href="https://app.vbout.com/Settings" target="_blank">here</a> to obtain your api key.]]></comment>
+                        </user_key>
+                    </fields>
+                </api_settings>
+            </groups>
+        </vbout>
+    </sections>
+</config>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/******************************************************
+ * Package   : Vbout
+ * Author    : MMG
+ * Copyright : (c) 2019
+*******************************************************/
+-->
+<layout version="0.1.0">
+    <adminhtml_system_config_edit>
+        <reference name="before_body_end">
+            <block type="core/template" name="adminhtml_vbout_scripts" template="vbout/vbout/scripts.phtml"/>
+        </reference>
+    </adminhtml_system_config_edit>
+</layout>

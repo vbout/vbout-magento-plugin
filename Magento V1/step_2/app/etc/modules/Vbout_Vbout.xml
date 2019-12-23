@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/******************************************************
+ * Package   : Vbout
+ * Author    : MMG
+ * Copyright : (c) 2019
+*******************************************************/
+-->
+<config>
+    <modules>
+        <Vbout_Vbout>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Vbout_Vbout>
+    </modules>
+</config>

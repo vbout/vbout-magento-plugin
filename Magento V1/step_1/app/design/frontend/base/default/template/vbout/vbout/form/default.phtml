@@ -1,0 +1,250 @@
+<?php $form = $this->getForm(); ?>
+<?php if (is_array($form) && count($form)): ?>
+    <?php
+    if (!function_exists('is_serialized')) {
+        function is_serialized($data)
+        {
+            // if it isn't a string, it isn't serialized
+            if (!is_string($data))
+                return false;
+            $data = trim($data);
+            if ('N;' == $data)
+                return true;
+            if (!preg_match('/^([adObis]):/', $data, $badions))
+                return false;
+            switch ($badions[1]) {
+                case 'a' :
+                case 'O' :
+                case 's' :
+                    if (preg_match("/^{$badions[1]}:[0-9]+:.*[;}]\$/s", $data))
+                        return true;
+                    break;
+                case 'b' :
+                case 'i' :
+                case 'd' :
+                    if (preg_match("/^{$badions[1]}:[0-9.E-]+;\$/", $data))
+                        return true;
+                    break;
+            }
+            return false;
+        }
+    }
+
+    if (!function_exists('maybe_unserialize')) {
+        function maybe_unserialize($original)
+        {
+            if (is_serialized($original)) // don't attempt to unserialize data that wasn't serialized going in
+                return @unserialize($original);
+            return $original;
+        }
+    }
+
+    if (!function_exists('checked')) {
+        function checked($value, $match)
+        {
+            if ($value == $match) // don't attempt to unserialize data that wasn't serialized going in
+                return 'checked="checked"';
+
+            return '';
+        }
+    }
+
+    if (!function_exists('selected')) {
+        function selected($value, $match)
+        {
+            if ($value == $match) // don't attempt to unserialize data that wasn't serialized going in
+                return 'selected="selected"';
+
+            return '';
+        }
+    }
+    ?>
+    <div id="vbout_EmbedFormWrapper_<?php echo $form['id']; ?>">
+        <form action="https://www.vbout.com/embedcode/submit/<?php echo $form['id']; ?>/" method="post" id="vbout_EmbedForm_<?php echo $form['id']; ?>" name="vbout_EmbedForm_<?php echo $form['id']; ?>">
+            <?php $list = $this->getList(); ?>
+            <h1><?php echo $list['form_title']; ?></h1>
+            <div id="response_embed_<?php echo $form['id']; ?>" style="display: none;"></div>
+            <fieldset>
+                <?php $fields = $form['fields']; ?>
+                <?php if (isset($fields) && $fields != NULL): $dates = array(); ?>
+                    <?php foreach ($fields as $field): ?>
+                        <?php
+                        $field_id = $field['meta']['field_id'];
+                        $field_type = $field['meta']['field_type'];
+                        $field_name = stripslashes($field['meta']['field_name']);
+                        $required_span = (!empty($field['meta']['field_required']) && $field['meta']['field_required'] === 'yes') ? '<span class="required-asterisk">*</span>' : '';
+                        $required = (!empty($field['meta']['field_required']) && $field['meta']['field_required'] === 'yes') ? ' required' : '';
+                        $validation = (!empty($field['meta']['field_validation'])) ? $field['meta']['field_validation'] : '';
+                        $css = (!empty($field['meta']['field_css'])) ? $field['meta']['field_css'] : '';
+                        $id_attr = "custom-{$field_id}";
+                        $default = (!empty($field['meta']['field_default'])) ? stripslashes($field['meta']['field_default']) : '';
+                        $description = (!empty($field['meta']['field_description'])) ? stripslashes($field['meta']['field_description']) : '';
+                        ?>
+                        <p>
+                            <label class="title" for="<?php echo $id_attr; ?>"><?php echo $field_name; ?><?php echo $required_span; ?></label>
+                            <?php if ($description != ''): ?>
+                                <span class="note" style="display: block; font-size: 12px; color: #999; "><?php echo $description; ?></span>
+                            <?php endif; ?>
+                        </p>
+                        <?php
+                        switch ($field_type) {
+                            case 'text' :
+                            case 'email' :
+                            case 'url' :
+                            case 'currency' :
+                            case 'number' :
+                            case 'phone' :
+                                // HTML5 types
+                                if (in_array($field_type, array('email'))) {
+                                    $type = $field_type;
+                                    $css .= $field_type;
+                                } elseif ('phone' == $field_type)
+                                    $type = 'tel';
+                                else
+                                    $type = 'text';
+                                $form_item = sprintf(
+                                    '<p class=""><input type="%7$s" name="vbout_EmbedForm[field][%1$d]" id="%2$s" value="%3$s" class="input-text vfb-text %4$s %5$s %6$s" /></p>',
+                                    $field_id,
+                                    $id_attr,
+                                    $default,
+                                    $required,
+                                    $validation,
+                                    $css,
+                                    $type
+                                );
+                                echo $form_item;
+                                break;
+                            case 'textarea' :
+                                $form_item = sprintf(
+                                    '<p class=""><textarea name="vbout_EmbedForm[field][%1$d]" id="%2$s" class="input-text vfb-textarea %4$s %5$s">%3$s</textarea></p>',
+                                    $field_id,
+                                    $id_attr,
+                                    $default,
+                                    $required,
+                                    $css
+                                );
+                                echo $form_item;
+                                break;
+                            case 'select' :
+                                $field_options = maybe_unserialize($field['meta']['field_options']);
+                                $options = '';
+                                // Loop through each option and output
+                                foreach ($field_options as $option => $value) {
+                                    $options .= sprintf('<option value="%1$s"%2$s>%1$s</option>', trim(stripslashes($value)), selected($default, ++$option));
+                                }
+                                $form_item = sprintf(
+                                    '<p class=""><select name="vbout_EmbedForm[field][%1$d]" id="%2$s" class="vfb-select %3$s %4$s %5$s">%6$s</select></p>',
+                                    $field_id,
+                                    $id_attr,
+                                    $size,
+                                    $required,
+                                    $css,
+                                    $options
+                                );
+                                echo $form_item;
+                                break;
+                            case 'radio' :
+                                $field_options = maybe_unserialize($field['meta']['field_options']);
+                                $options = '';
+                                // Loop through each option and output
+                                foreach ($field_options as $option => $value) {
+                                    $option++;
+                                    $options .= sprintf(
+                                        '<p class="field"><input type="radio" name="vbout_EmbedForm[field][%1$d]" id="%2$s-%3$d" value="%6$s" class="vfb-radio %4$s %5$s"%8$s /><label for="%2$s-%3$d" class="vfb-choice">%7$s</label></p>',
+                                        $field_id,
+                                        $id_attr,
+                                        $option,
+                                        $required,
+                                        $css,
+                                        trim(stripslashes($value)),
+                                        stripslashes($value),
+                                        checked($default, $option)
+                                    );
+                                }
+                                $form_item = $options;
+                                echo $form_item;
+                                break;
+                            case 'checkbox' :
+                                $field_options = maybe_unserialize($field['meta']['field_options']);
+                                $options = '';
+                                // Loop through each option and output
+                                foreach ($field_options as $option => $value) {
+                                    $options .= sprintf(
+                                        '<p class="field"><input type="checkbox" name="vbout_EmbedForm[field][%1$d][]" id="%2$s-%3$d" value="%6$s" class="vfb-checkbox %4$s %5$s"%8$s /><label for="%2$s-%3$d" class="vfb-choice">%7$s</label></p>',
+                                        $field_id,
+                                        $id_attr,
+                                        $option,
+                                        $required,
+                                        $css,
+                                        trim(stripslashes($value)),
+                                        stripslashes($value),
+                                        checked($default, ++$option)
+                                    );
+                                }
+                                $form_item = $options;
+                                echo $form_item;
+                                break;
+                            case 'date' :
+                                $options = maybe_unserialize($field['meta']['field_options']);
+                                $dateFormat = ($options) ? $options['dateFormat'] : '';
+                                $dates[] = array('id' => $id_attr, 'format' => $dateFormat);
+                                $form_item = sprintf(
+                                    '<p class=""><input type="text" name="vbout_EmbedForm[field][%1$d]" id="%2$s" value="%3$s" class="input-text vfb-text date date-picker %4$s %5$s" data-format="%6$s" /></p>',
+                                    $field_id,
+                                    $id_attr,
+                                    $default,
+                                    $required,
+                                    $css,
+                                    $dateFormat
+                                );
+                                echo $form_item;
+                                break;
+                            default:
+                                echo '';
+                        }
+                        ?>
+                    <?php endforeach; ?>
+                    <button type="submit" title="<?php echo $this->__('Submit'); ?>" class="button"><span><span><?php echo $this->__('Submit'); ?></span></span></button>
+                <?php endif; ?>
+            </fieldset>
+        </form>
+    </div>
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery("#vbout_EmbedForm_<?php echo $form['id']; ?>").validate();
+            <?php if (isset($dates) && is_array($dates)): ?>
+            <?php foreach($dates as $date): ?>
+            jQuery('#<?php echo $date['id']; ?>').DatePicker({
+                format: '<?php echo $date['format'] ?>',
+                date: '<?php echo date($date['format'], time()); ?>',
+                current: '<?php echo date($date['format'], time()); ?>',
+                onChange: function (formated, dates) {
+                    jQuery('#<?php echo $date['id']; ?>').val(formated);
+                    jQuery('#<?php echo $date['id']; ?>').DatePickerHide();
+                }
+            });
+            <?php endforeach; ?>
+            <?php endif; ?>
+            var options_<?php echo $form['id']; ?> = {
+                url: 'https://www.vbout.com/embedcode/submit/<?php echo $form['id']; ?>/?uid=<?php echo time(); ?>&callback=?',
+                type: 'GET',
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                beforeSubmit: function () {
+                    jQuery('#response_embed_<?php echo $form['id']; ?>').hide();
+                },
+                success: function (data) {
+                    jQuery('#response_embed_<?php echo $form['id']; ?>').show();
+                    jQuery('#response_embed_<?php echo $form['id']; ?>').html(data.msg);
+                    // get the top offset of the target anchor
+                    var target_offset = jQuery("#response_embed_<?php echo $form['id']; ?>").offset();
+                    var target_top = target_offset.top;
+                    //goto that anchor by setting the body scroll top to anchor top
+                    jQuery('html, body').animate({scrollTop: target_top}, 250);
+                    jQuery('#vbout_EmbedForm_<?php echo $form['id']; ?>').trigger("reset");
+                }
+            };
+            jQuery('#vbout_EmbedForm_<?php echo $form['id']; ?>').ajaxForm(options_<?php echo $form['id']; ?>);
+        });
+    </script>
+<?php endif; ?>

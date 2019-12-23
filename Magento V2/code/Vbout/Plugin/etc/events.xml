@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_cart_add_product_complete">
+        <observer name="after_add_to_cart" instance="Vbout\Plugin\Observer\AddToCart" />
+    </event>
+    <event name="checkout_submit_all_after">
+        <observer name="vbout_checkout_submit_all_after" instance="Vbout\Plugin\Observer\CreateOrder" />
+    </event>
+    <event name="customer_register_success">
+        <observer name="vbout_customer_register_success" instance="Vbout\Plugin\Observer\CreateCustomer" />
+    </event>
+    <event name="catalog_product_save_after">
+        <observer name="product_save_after" instance="Vbout\Plugin\Observer\AddProduct" />
+    </event>
+    <event name="sales_order_save_after">
+        <observer name="vbout_sales_order_save_after" instance="Vbout\Plugin\Observer\UpdateOrder" />
+    </event>
+    <event name="catalog_controller_product_view">
+        <observer name="vbout_catalog_controller_product_view" instance="Vbout\Plugin\Observer\ProductView" />
+    </event>
+    <event name="abstract_search_result_load_after">
+        <observer name="vbout_abstract_search_result_load_after" instance="Vbout\Plugin\Observer\ProductSearch" />
+    </event>
+    <event name="sales_quote_remove_item">
+        <observer name="vbout_sales_quote_remove_item" instance="Vbout\Plugin\Observer\CartRemoveItem" />
+    </event>
+    <event name="admin_system_config_changed_section_vbout">
+        <observer name="custom_admin_system_config_changed_section_general" instance="Vbout\Plugin\Observer\AfterSaveConfig"/>
+    </event>
+    <event name="checkout_cart_update_items_after">
+        <observer name="vbout_checkout_cart_update_items_after" instance="Vbout\Plugin\Observer\UpdateCartItem"/>
+    </event>
+</config>
