@@ -69,19 +69,17 @@ Magento 2 Plugin that link Metadata of orders, carts customers , searches, produ
   
                     Listener                              | Function Name               | Descritpion
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *__customer_register_successk__*      | `CreateCustomer`            | `This function is to create users on registrations.`
+                    *customer_register_success*           | `CreateCustomer`            | `This function is to create users on registrations.`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-        *__checkout_type_onepage_save_order_after__*      | `checkoutCartOrderCreate`   | `This function for checkout with a cart with prior log in.`
+        *__checkout_type_onepage_save_order_after__*      | `CreateOrder`               | `This function for checkout with a cart with prior log in.`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *__checkout_cart_save_after__*        | `cartCheckoutCreate`        | `This function to Add To Cart Function, that creates a cart and Adds the Items`
+                    *checkout_cart_add_product_complete*  | `AddToCart`                 | `This function to Add To Cart Function, that creates a cart and Adds the Items`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *__sales_quote_item_delete_after__*   | `cartRemoveItem`            | `Removes cart items from a cart.`
+                    *sales_quote_remove_item*             | `CartRemoveItem`            | `Removes cart items from a cart.`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *__catalog_controller_product_view__* | `ProductView`               | `This function to send the product view by the customer or IP address ( then it can be linked)`
+                    *catalog_controller_product_view*     | `ProductView`               | `This function to send the product view by the customer or IP address ( then it can be linked)`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *__checkout_submit_all_after__*       | `CreateOrder`               | `Create an order with all it's data (After placing an order).`
-                    ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-                    *sales_quote_remove_item*             | `CartRemoveItem`            | `Remove Cart Item.`
+                    *checkout_submit_all_after*           | `CreateOrder`               | `Create an order with all it's data (After placing an order).`
                     ------------------------------------  | --------------------------- | ------------------------------------------------------------------
 
 
@@ -89,11 +87,11 @@ Magento 2 Plugin that link Metadata of orders, carts customers , searches, produ
         
             Listener                              | Function Name               | Descritpion
        -----------------------------------------  | --------------------------- | ------------------------------------------------------------------
-            *__catalog_product_save_after__*      | `AddProduct`                | `Once a product is added or Updated.`
+            *catalog_product_save_after*          | `AddProduct`                | `Once a product is added or Updated.`
             ------------------------------------  | --------------------------- | ------------------------------------------------------------------
       *admin_system_config_changed_section_vbout* | `AfterSaveConfig`           | `Customized configuration for integration settings between Magento and Vbout. This also allows the user to control what features they want in the 
             ------------------------------------  | --------------------------- | ------------------------------------------------------------------
             *sales_order_save_after*              | `UpdateOrder`               | `When an admin wants to Update order, it updates the order and order status(taking in consideration Billing and Shipping info).`
             ------------------------------------  | --------------------------- | ------------------------------------------------------------------
-        *__controller_action_layout_load_before__*| `productSearchQuery`        | `This is a listener on every page load, it checks if the page has search query to be able to get searched queries.`
+        *abstract_search_result_load_after*       | `ProductSearch`             | `This is a listener on every page load, it checks if the page has search query to be able to get searched queries.`
             ------------------------------------  | --------------------------- | ------------------------------------------------------------------
