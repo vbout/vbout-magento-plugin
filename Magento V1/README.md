@@ -16,13 +16,9 @@ Magento Plugin that link Metadata of orders, carts customers , searches, product
     2 - The functions with Magento 2 might be depriciated.
     3 - if the Administrator has many Customers/Products, the sync might take a while , so it needs optimization with cron.php in Magento.
   
-## Variations : 
-  
- Variations in Magento are handeled as a product with aditional SKU (ammended to the original SKu EX: orginialsky-newsku : xxxx-yyyy). 
- For this they are being handeled as Parent product (origninal SKU and Price ) are added to product Feed, and all the ammendments ( SKKU and Price ) 
- are added in the cart product data.
+## Variations :
  
- Variations are sent as an array upon adding a product, syncing a product and viewing a produnct.
+ Variations are sent as an array upon adding a product, syncing a product and viewing a product. But when purchasing a certain variation of a product, we send the new product data to be viewed ( New Category, New Price, New Variation Name , New SKU) to be previewed in Vbout.
  
 ## Search : 
   
