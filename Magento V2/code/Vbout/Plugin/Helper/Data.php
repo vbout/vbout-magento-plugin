@@ -69,21 +69,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
             return $this->scopeConfig->getValue(self::XML_PATH_API . $code, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeManager->getStore()->getStoreId());
     }
-//
-//    public function getConfigValue($field, $storeId = null)
-//    {
-//        return $this->scopeConfig->getValue(
-//            $field, ScopeInterface::SCOPE_STORE, $storeId
-//        );
-//    }
-//
-//    public function getGeneralConfig($code, $storeId = null)
-//    {
-//
-//        return $this->getConfigValue(self::XML_PATH_VBOUT .'general/'. $code, $storeId);
-//    }
-//
-//    /**
+
     public function getAuthTokens()
     {
         $authTokens = 0;
@@ -185,100 +171,119 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $sessionId;
     }
 
+    //Sync All Customers
     public function syncCurrentCustomers($authTokens, $domain)
     {
-
+        $starttime = time();
         $vboutApp = new EcommerceWS($authTokens);
-        $users = $this->_customerCollectionFactory->create()
-            ->addAttributeToSelect('firstname')
-            ->addAttributeToSelect('lastname')
-            ->addAttributeToSelect('email');
-        if (count($users) > 0) {
-            foreach ($users as $user) {
+        $page = 1;
 
-                $customer = array(
-                    "firstname" => $user->getFirstname(),
-                    "lastname" => $user->getLastname(),
-                    "email" => $user->getEmail(),
-                    'domain' => $domain,
-                    'ipaddress' => $_SERVER['REMOTE_ADDR']
-                );
-                try{
-                    $result = $vboutApp->Customer($customer, 1);
+        try{
+            do {
+                $users = $this->_customerCollectionFactory->create()
+                    ->addAttributeToSelect('firstname')
+                    ->addAttributeToSelect('lastname')
+                    ->addAttributeToSelect('email')
+                    ->setPageSize(10)
+                    ->setCurPage($page);
+
+                if ($users->count() > 0) {
+                    foreach ($users as $user) {
+                        $customer = array(
+                            "firstname" => $user->getFirstname(),
+                            "lastname" => $user->getLastname(),
+                            "email" => $user->getEmail(),
+                            'domain' => $domain,
+                            'ipaddress' => $_SERVER['REMOTE_ADDR']
+                        );
+                        $vboutApp->Customer($customer, 1);
+                    }
+                    $page++;
+                    $users->clear();
                 }
-                catch (\Exception $e)
-                {}
-            }
-        }
+
+                $now = time()-$starttime;
+
+            } while ($users->count() > 0 && $now < 30);
+        } catch (\Exception $e) {}
     }
 
     //Sync All Products
     public function syncCurrentProducts($authTokens,$domain)
     {
-        $this->logger->debug('here message');
+        $starttime = time();
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-
         $vboutApp = new EcommerceWS($authTokens);
+        $page = 1;
 
-        $productCollection = $this->_productCollectionFactory->create();
-        $productCollection->addAttributeToSelect('*');
-        $productCollection->setPageSize(10);
+        try{
+            do {
+                $productCollection = $this->_productCollectionFactory->create()
+                ->addAttributeToSelect('*')
+                ->setPageSize(10)
+                ->setCurPage($page);
 
-        $this->logger->debug(json_encode($productCollection));
+                if($productCollection->count() > 0) {
+                    foreach ($productCollection as $product) {
 
-            foreach ($productCollection as $product)
-            {
-                $this->logger->debug('here message');
-
-//                //Get variations
-                $variation = array();
-                $customOptions = $objectManager->get('Magento\Catalog\Model\Product\Option')
-                    ->getProductOptionCollection($product);
-
-                foreach($customOptions as $key=>$o) {
-                    $optionType = $o->getType();
-                    if ($optionType == 'drop_down') {
-                        $values = $o->getValues();
-                        $countVariations = 0 ;
-                        $variations = '';
-                        foreach ($values as $key=>$v) {
-                            $variations .= $v->getTitle();
-                            if($countVariations < count($values)-1)
-                                $variations .=', ';
-                            $countVariations++;
+                        //Get variations
+                        $variation = array();
+                        $customOptions = $objectManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($product);
+                        foreach($customOptions as $key=>$o) {
+                            $optionType = $o->getType();
+                            if ($optionType == 'drop_down') {
+                                $values = $o->getValues();
+                                $countVariations = 0 ;
+                                $variations = '';
+                                foreach ($values as $key=>$v) {
+                                    $variations .= $v->getTitle();
+                                    if($countVariations < count($values)-1)
+                                        $variations .=', ';
+                                    $countVariations++;
+                                }
+                                $variation[$o->getTitle()] = $variations;
+                            }
                         }
-                        $variation[$o->getTitle()] = $variations;
+
+                        //Get Discount
+                        if ($product->getPrice() != $product->getFinalPrice()){
+                            $discountPrice = $product->getFinalPrice();
+                        }
+                        else $discountPrice = '0.0';
+
+                        //Get Category
+                        if($product->getCategoryIds()[0] != ''){
+                            $categoryName = $objectManager->create('Magento\Catalog\Model\Category')->load($product->getCategoryIds()[0])->getName();
+                        }
+                        else $categoryName = 'N/A';
+
+                        $productData = array(
+                            "productid"     => $product->getId(),
+                            "name"          => $product->getName(),
+                            "price"         => (float)$product->getPrice(),
+                            "description"   => $product->getDescription(),
+                            "discountprice" =>  $discountPrice,
+                            "currency"      => $this->storeManager->getStore()->getCurrentCurrency()->getCode(),
+                            "sku"           => $product->getSku(),
+                            "categoryid"    => $product->getCategoryIds()[0],
+                            "category"      => $categoryName,
+                            "variation"     => $variation,
+                            "link"          => $product->getProductUrl(),
+                            "image"         => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage(),
+                            'domain'        => $domain,
+                        );
+
+                        $vboutApp->Product($productData,1);
+
                     }
+                    $page++;
+                    $productCollection->clear();
                 }
 
-                //Get Discount
-                if ($product->getPrice() != $product->getFinalPrice())
-                    $discountPrice = $product->getFinalPrice();
-                else $discountPrice = '0.0';
-                if($product->getCategoryIds()[0] != '')
-                    $categoryName = $objectManager->create('Magento\Catalog\Model\Category')->load($product->getCategoryIds()[0])->getName();
-                else $categoryName = 'N/A';
-                $productData = array(
-                    "productid"     => $product->getId(),
-                    "name"          => $product->getName(),
-                    "price"         => (float)$product->getPrice(),
-                    "description"   => $product->getDescription(),
-                    "discountprice" =>  $discountPrice,
-                    "currency"      => $this->storeManager->getStore()->getCurrentCurrency()->getCode(),
-                    "sku"           => $product->getSku(),
-                    "categoryid"    => $product->getCategoryIds()[0],
-                    "category"      => $categoryName,
-                    "variation"     => $variation,
-                    "link"          => $product->getProductUrl(),
-                    "image"         => $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage(),
-                    'domain'        => $domain,
-                );
-                try{
-                    $result = $vboutApp->Product($productData,1);
-                }
-                catch (\Exception $e)
-                {}
-            }
+                $now = time()-$starttime;
+
+            } while ($productCollection->count() > 0 && $now < 30);
+        } catch (\Exception $e) {}
     }
 }
 

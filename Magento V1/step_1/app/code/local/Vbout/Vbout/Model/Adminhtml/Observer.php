@@ -61,8 +61,10 @@ class Vbout_Vbout_Model_Adminhtml_Observer {
 
 
                      //Sync Functionality
-                  if($helper->getSyncCurrentProducts() == 1)
-                        $this->syncCurrentProducts($authTokens,$domain);
+                  if($helper->getSyncCurrentProducts() == 1){
+                      $this->syncCurrentProducts($authTokens,$domain);
+                  }
+
                  if($helper->getCurrentCustomers() == 1)
                      $this->syncCurrentCustomers($authTokens,$domain);
             }
@@ -138,7 +140,7 @@ class Vbout_Vbout_Model_Adminhtml_Observer {
                                 </customers>
                                 <current_customers translate="label">
                                     <config_path>vbout/api_settings/current_customers</config_path>
-                                    <label>Exsisting Customers</label>
+                                    <label>Existing Customers</label>
                                     <frontend_type>select</frontend_type>
                                     <source_model>adminhtml/system_config_source_yesno</source_model>
                                     <sort_order>20</sort_order>
@@ -186,82 +188,122 @@ class Vbout_Vbout_Model_Adminhtml_Observer {
             $vboutSectionGroups->appendChild($newGroupXml);
           return $this;
     }
+
     //Sync All Customers
     public function syncCurrentCustomers($authTokens,$domain)
     {
+        $starttime = time();
         $vboutApp = new EcommerceWS($authTokens);
-        $users = Mage::getModel('customer/customer')->getCollection()
-            ->addAttributeToSelect('firstname')
-            ->addAttributeToSelect('lastname')
-            ->addAttributeToSelect('email');
-        if (count($users) > 0) {
-            foreach ($users as $user) {
 
-                $customer = array(
-                    "firstname" => $user->getFirstname(),
-                    "lastname"  => $user->getLastname(),
-                    "email"     => $user->getEmail(),
-                    'domain'    => $domain,
-                    'ipaddress' => $_SERVER['REMOTE_ADDR']
-                );
-                $result = $vboutApp->Customer($customer, 1);
-            }
+        $page = 1;
+
+        try{
+            do {
+                $users = Mage::getModel('customer/customer')
+                    ->getCollection()
+                    ->addAttributeToSelect('firstname')
+                    ->addAttributeToSelect('lastname')
+                    ->addAttributeToSelect('email')
+                    ->setPageSize(10)
+                    ->setCurPage($page);
+
+                if($users->count() > 0){
+                    foreach ($users as $user) {
+                        $customer = array(
+                            "firstname" => $user->getFirstname(),
+                            "lastname" => $user->getLastname(),
+                            "email" => $user->getEmail(),
+                            'domain' => $domain,
+                            'ipaddress' => $_SERVER['REMOTE_ADDR']
+                        );
+                        $vboutApp->Customer($customer, 1);
+                    }
+                    $page++;
+                    $users->clear();
+                }
+
+                $now = time()-$starttime;
+
+            } while ($users->count() > 0 && $now < 30);
+        } catch (Exception $e) {
+            Mage::log($e->getMessage(), null, 'vbout-ecommerce-marketing.log');
         }
     }
 
     //Sync All Products
     private function syncCurrentProducts($authTokens,$domain)
     {
+        $starttime = time();
         $vboutApp = new EcommerceWS($authTokens);
-        $products = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToSelect('*'); // select all attributes
-//            ->setPageSize(5000) // limit number of results returned
-//            ->setCurPage(1); // set the offset (useful for pagination)
 
+        $page = 1;
 
-        foreach ($products as $product)
-        {
-            //Get variations
-            $variation = array();
-            foreach($product->getOptions() as $key=>$o) {
-                $optionType = $o->getType();
-                if ($optionType == 'drop_down') {
-                    $values = $o->getValues();
-                    $countVariations = 0 ;
-                    $variations = '';
-                    foreach ($values as $key=>$v) {
-                        $variations .= $v->getTitle();
-                        if($countVariations < count($values)-1)
-                            $variations .=', ';
-                        $countVariations++;
+        try{
+            do {
+                $products = Mage::getModel('catalog/product')
+                    ->getCollection()
+                    ->setPageSize(10)
+                    ->setCurPage($page);
+
+                $products = $products->load();
+
+                if($products->count() > 0) {
+                    foreach ($products as $product) {
+                        //Get variations
+                        $variation = array();
+                        foreach ($product->getOptions() as $key => $o) {
+                            $optionType = $o->getType();
+                            if ($optionType == 'drop_down') {
+                                $values = $o->getValues();
+                                $countVariations = 0;
+                                $variations = '';
+                                foreach ($values as $key => $v) {
+                                    $variations .= $v->getTitle();
+                                    if ($countVariations < count($values) - 1)
+                                        $variations .= ', ';
+                                    $countVariations++;
+                                }
+                                $variation[$o->getTitle()] = $variations;
+                            }
+                        }
+
+                        //Get Discount
+                        if ($product->getPrice() != $product->getFinalPrice()) {
+                            $discountPrice = $product->getFinalPrice();
+                        } else {
+                            $discountPrice = '0.0';
+                        }
+                        if ($product->getCategoryIds()[0] != '') {
+                            $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
+                        } else {
+                            $categoryName = 'N/A';
+                        }
+                        $productData = array(
+                            "productid" => $product->getId(),
+                            "name" => $product->getName(),
+                            "price" => (float)$product->getPrice(),
+                            "description" => $product->getDescription(),
+                            "discountprice" => $discountPrice,
+                            "currency" => Mage::app()->getStore()->getCurrentCurrencyCode(),
+                            "sku" => $product->getSku(),
+                            "categoryid" => $product->getCategoryIds()[0],
+                            "category" => $categoryName,
+                            "variation" => $variation,
+                            "link" => $product->getProductUrl(),
+                            "image" => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage(),
+                            'domain' => $domain,
+                        );
+                        $result = $vboutApp->Product($productData, 1);
                     }
-                    $variation[$o->getTitle()] = $variations;
+                    $page++;
+                    $products->clear();
                 }
-            }
 
-            //Get Discount
-            if ($product->getPrice() != $product->getFinalPrice())
-                $discountPrice = $product->getFinalPrice();
-                    else $discountPrice = '0.0';
-            if($product->getCategoryIds()[0] != '')
-                $categoryName = Mage::getModel('catalog/category')->load($product->getCategoryIds()[0])->getName();
-                else $categoryName = 'N/A';
-            $productData = array(
-                "productid"     => $product->getId(),
-                "name"          => $product->getName(),
-                "price"         => (float)$product->getPrice(),
-                "description"   => $product->getDescription(),
-                "discountprice" =>  $discountPrice,
-                "currency"      => Mage::app()->getStore()->getCurrentCurrencyCode(),
-                "sku"           => $product->getSku(),
-                "categoryid"    => $product->getCategoryIds()[0],
-                "category"      => $categoryName,
-                "variation"     => $variation,
-                "link"          => $product->getProductUrl(),
-                "image"         => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$product->getImage(),
-                'domain'        => $domain,
-            );
-            $result = $vboutApp->Product($productData,1);
+                $now = time()-$starttime;
+
+            } while ($products->count() > 0 && $now < 30);
+        } catch (Exception $e) {
+            Mage::log($e->getMessage(), null, 'vbout-ecommerce-marketing.log');
         }
     }
 }

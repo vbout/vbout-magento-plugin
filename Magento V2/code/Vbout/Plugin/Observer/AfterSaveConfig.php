@@ -12,17 +12,11 @@ class AfterSaveConfig implements ObserverInterface
      */
     protected $helper;
     protected $_configValueFactory;
+    const CUSTOM_OPTION_STRING_PATH = 'vbout/api_settings/domain';
 
     public function __construct(
         \Magento\Framework\Model\Context $context,
-
-//        \Magento\Framework\Registry $registry,
-//        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-//        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Framework\App\Config\ValueFactory $configValueFactory,
-//        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-//        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        // Helper
         \Vbout\Plugin\Helper\Data $helper,
         array $data = []
     ) {
@@ -31,8 +25,6 @@ class AfterSaveConfig implements ObserverInterface
 
         //Helper
         $this->helper = $helper;
-
-//        parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -43,9 +35,7 @@ class AfterSaveConfig implements ObserverInterface
         $vboutApp = new EcommerceWS($authTokens);
 
 
-            if($helper->getDomain() == '0')
-//        try {
-        {
+        if($helper->getDomain() == '0') {
             $domain = $vboutApp->getDomain(array(
                 'domain' => $_SERVER['HTTP_HOST'],
                 'api_key' => $authTokens
@@ -62,18 +52,13 @@ class AfterSaveConfig implements ObserverInterface
         }
             else $domain = $helper->getDomain();
 
-//
-//
-//        } catch (\Exception $e) {
-//            throw new \Exception(__('We can\'t save new option.'));
-//        }
         $settingsPayload = array(
             'domain'  => $domain,
             'apiname' => 'Magento',
             'apikey'  => $authTokens,
         );
         try{
-            $result = $vboutApp->sendAPIIntegrationCreation($settingsPayload,1);
+            $vboutApp->sendAPIIntegrationCreation($settingsPayload,1);
         }
         catch (\Exception $e)
         {}
@@ -93,7 +78,7 @@ class AfterSaveConfig implements ObserverInterface
             'apiName'               => 'Magento',
         );
         try{
-            $result = $vboutApp->sendSettingsSync($settings);
+            $vboutApp->sendSettingsSync($settings);
         }
         catch (\Exception $e)
         {}
