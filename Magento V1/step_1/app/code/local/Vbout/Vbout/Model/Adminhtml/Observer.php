@@ -279,6 +279,7 @@ class Vbout_Vbout_Model_Adminhtml_Observer {
                             $categoryName = 'N/A';
                         }
                         $productData = array(
+                            "sync" => true,
                             "productid" => $product->getId(),
                             "name" => $product->getName(),
                             "price" => (float)$product->getPrice(),

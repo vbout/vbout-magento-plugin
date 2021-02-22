@@ -258,6 +258,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         else $categoryName = 'N/A';
 
                         $productData = array(
+                            "sync"          => true,
                             "productid"     => $product->getId(),
                             "name"          => $product->getName(),
                             "price"         => (float)$product->getPrice(),

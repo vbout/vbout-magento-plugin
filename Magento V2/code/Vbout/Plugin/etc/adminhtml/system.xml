@@ -52,7 +52,7 @@
                 </field>
 
                 <field id="current_customers" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Exsisting Customers</label>
+                    <label>Existing Customers</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Syncs customers' data before installing the plugin on Magento.</comment>
                 </field>
