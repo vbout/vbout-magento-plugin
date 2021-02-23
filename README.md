@@ -1,5 +1,6 @@
 # vbout-magento-plugin
-Magento Plugins for 2 Versions 1.X and 2.X. These plugins have readied functionalities for the Ecommerce Framework to talk with 
-VBOUT application throughout REST API calls. 
+Magento Plugins for 2 Versions 1.X and 2.X. 
 
-2 Versions of Magento have different code calls, functions and file/path structure. 
+These plugins ensure the communication with VBOUT through REST API calls to track all ecommerce activities held. 
+
+Instructions and setup docs are available under the readme of each version folders

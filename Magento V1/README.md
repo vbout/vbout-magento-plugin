@@ -28,24 +28,24 @@ Variations are sent as an array upon adding a product, syncing a product and vie
 ## Orders and Abandonded Carts : 
   
   ### Checkout : 
-    
         There is a listener for checkout and does the following :
           - A new customer is created ( since there is a no prior log in)
           - Cart is created
           - Products are added ( a loop to handle them )
   ### Create and Update Cart  : 
-          there is a listener for both Cart Update and Cart create and they have the following functionalities : 
-            - Get the current logged in customer and it's data. 
-            - Create a new cart
-            - Products are added ( a loop to handle them ) 
+        There is a listener for both Cart Update and Cart create and they have the following functionalities : 
+          - Get the current logged in customer and it's data. 
+          - Create a new cart
+          - Products are added ( a loop to handle them ) 
+          - Updating Cart : 
+              - In the process of updating cart, any update to status( Cancelled, Pending, Paid, Shipped/success), details, products is updated directly.
+
   ### Cart Item Remove : 
           There is a listener for cart remove item, nonetheless, it doesnt send the item ID , and the data that it presents was protected and we didn't have the access. 
           This was solved by creating a new API function to EmptyCart, where we we emptied all cart items, and then re-added them. Since the observer returns the Items left in cart.
   ### Orders Create and Update : 
       The both have different listeners, they work the same. An Order is added with Shipping and Biling information, alongside with customer's information.
       
-      - Updating Cart : 
-          - In the process of updating cart, any update to status( Cancelled, Pending, Paid, Shipped/success), details, products is updated directly.
 ## Customers Add, Update and Sync :
     - Customers are added, updated on registering and checkout.
     - Customer's sync adds all the users in the system that had previous orders or registered.
